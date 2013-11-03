@@ -19,7 +19,7 @@
         android:layout_alignTop="@id/fireButton"
         android:layout_toRightOf="@id/fireButton"
         android:clickable="false"/>
-
+<!--
     <SeekBar
         android:id="@+id/seekBar2"
         android:layout_width="match_parent"
@@ -27,5 +27,5 @@
         android:layout_below="@id/seekBar1"
         android:layout_toRightOf="@id/fireButton"
         android:clickable="false"
-        android:rotation="180"/>
+        android:rotation="180"/>-->
 </RelativeLayout>

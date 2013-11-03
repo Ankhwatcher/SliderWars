@@ -4,15 +4,20 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class play_activity extends Activity {
-    Runnable updateSeek = new UpdateRunnable();
+
+    Toast targetHit = null;
+    int hitCount =0;
     ArrayList<RelativeLayout> interractList = new ArrayList<RelativeLayout>();
     Boolean appRunning = true;
     SeekBar.OnSeekBarChangeListener disableSeek = new SeekBar.OnSeekBarChangeListener() {
@@ -33,6 +38,52 @@ public class play_activity extends Activity {
             seekBar.setProgress(progress);
         }
     };
+    ArrayList<SeekBar> arrayList = new ArrayList<SeekBar>();
+    Thread countDownThread = new Thread(new Runnable() {
+        @Override
+        public void run() {
+
+        }
+    });
+    Thread backgroundThread = new Thread(new Runnable() {
+        public void run() {
+            while (true)
+
+
+            {
+                synchronized (this) {
+                    if (!appRunning)
+                        break;
+
+
+                    try {
+                        ((Object) this).wait(250);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        break;
+                    }
+                    List<SeekBar> seekBarListB = new ArrayList<SeekBar>();
+                    for (SeekBar seekBar : arrayList) {
+                        int progress = seekBar.getProgress();
+                        int seekIncrement = seekBar.getMax() / 20;
+                        progress += seekIncrement;
+                        if (progress == seekBar.getMax()) {
+
+                            seekBar.setProgress(0);
+                            targetHit.show();
+                        } else {
+                            seekBarListB.add(seekBar);
+                            seekBar.setProgress(progress);
+                        }
+
+                    }
+                    arrayList.clear();
+                    arrayList.addAll(seekBarListB);
+                }
+            }
+
+        }
+    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,15 +91,31 @@ public class play_activity extends Activity {
         setContentView(R.layout.activity_play);
         LinearLayout mainLayout = (LinearLayout) findViewById(R.id.container);
 
+        targetHit = Toast.makeText(this, "Target Hit!", Toast.LENGTH_SHORT);
+        backgroundThread.start();
 
         for (int i = 0; i < 3; i++) {
             RelativeLayout interract = (RelativeLayout) getLayoutInflater().inflate(R.layout.interract_layout, null);
-            ((TextView) interract.findViewById(R.id.fireButton)).setText(String.valueOf(i + 1));
-            ((SeekBar) interract.findViewById(R.id.seekBar1)).setOnSeekBarChangeListener(disableSeek);
-            ((SeekBar) interract.findViewById(R.id.seekBar2)).setOnSeekBarChangeListener(disableSeek);
+
+            final SeekBar seekBar1 = ((SeekBar) interract.findViewById(R.id.seekBar1));
+            seekBar1.setOnSeekBarChangeListener(disableSeek);
+
+            Button fireButton = (Button) interract.findViewById(R.id.fireButton);
+            fireButton.setText(String.valueOf(i + 1));
+            fireButton.setOnClickListener(new Button.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    synchronized (this) {
+                        arrayList.add(seekBar1);
+                    }
+
+                }
+            });
             mainLayout.addView(interract, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
             interractList.add(interract);
+
         }
+
 
     }
 
@@ -79,41 +146,5 @@ public class play_activity extends Activity {
             appRunning = false;
         }
     }
-
-    private class UpdateRunnable implements Runnable {
-        ArrayList<SeekBar> arrayList = new ArrayList<SeekBar>();
-
-        void setFiring(SeekBar seekBar) {
-            arrayList.add(seekBar);
-        }
-
-        @Override
-        public void run() {
-
-            while (true) {
-                synchronized (this) {
-                    if (!appRunning)
-                        break;
-                    try {
-                        ((Object) this).wait(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        break;
-                    }
-                    for (SeekBar seekBar : arrayList) {
-                        int progress = seekBar.getProgress();
-                        int seekIncrement = seekBar.getMax() / 10;
-                        progress += seekIncrement;
-                        if (progress == seekBar.getMax()) {
-                            arrayList.remove(seekBar);
-                            seekBar.setProgress(0);
-                        } else {
-
-                        }
-
-                    }
-                }
-            }
-        }
-    }
 }
+
