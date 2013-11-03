@@ -1,28 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ie.appz.sliderwars"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     android:versionCode="1"
-    android:versionName="1.0">
+    android:versionName="1.0" >
 
-    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+
     <uses-sdk
         android:minSdkVersion="16"
-        android:targetSdkVersion="19"/>
+        android:targetSdkVersion="19" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme" >
         <activity
-            android:label="@string/app_name"
-            android:name="ie.appz.sliderwars.play_activity">
+            android:name=".playActivity"
+            android:label="@string/app_name" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="ie.appz.sliderwars.ResultActivity"
+            android:label="@string/title_activity_result"
+            android:parentActivityName="ie.appz.sliderwars.play_activity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ie.appz.sliderwars.play_activity" />
         </activity>
     </application>
 

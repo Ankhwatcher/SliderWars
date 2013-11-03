@@ -1,6 +1,7 @@
 package ie.appz.sliderwars;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -9,15 +10,18 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class play_activity extends Activity {
+public class playActivity extends Activity {
 
+    public static String RESULT_INT = "result_int";
     Toast targetHit = null;
-    int hitCount =0;
+    TextView countdownText;
+    int hitCount = 0;
     ArrayList<RelativeLayout> interractList = new ArrayList<RelativeLayout>();
     Boolean appRunning = true;
     SeekBar.OnSeekBarChangeListener disableSeek = new SeekBar.OnSeekBarChangeListener() {
@@ -42,7 +46,30 @@ public class play_activity extends Activity {
     Thread countDownThread = new Thread(new Runnable() {
         @Override
         public void run() {
+            for (int j = 10; j > 0; j--) {
+                final int seconds = j;
+                synchronized (this) {
+                    try {
+                        ((Object) this).wait(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            countdownText.setText(seconds + "s");
+                        }
+                    });
 
+
+                }
+            }
+            synchronized (this) {
+                appRunning = false;
+                Intent intent = new Intent(playActivity.this, ResultActivity.class);
+                intent.putExtra(RESULT_INT, hitCount);
+                startActivity(intent);
+            }
         }
     });
     Thread backgroundThread = new Thread(new Runnable() {
@@ -51,10 +78,10 @@ public class play_activity extends Activity {
 
 
             {
+
                 synchronized (this) {
                     if (!appRunning)
                         break;
-
 
                     try {
                         ((Object) this).wait(250);
@@ -70,6 +97,7 @@ public class play_activity extends Activity {
                         if (progress == seekBar.getMax()) {
 
                             seekBar.setProgress(0);
+                            hitCount++;
                             targetHit.show();
                         } else {
                             seekBarListB.add(seekBar);
@@ -90,7 +118,7 @@ public class play_activity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
         LinearLayout mainLayout = (LinearLayout) findViewById(R.id.container);
-
+        countdownText = (TextView) findViewById(R.id.countdown);
         targetHit = Toast.makeText(this, "Target Hit!", Toast.LENGTH_SHORT);
         backgroundThread.start();
 
@@ -105,7 +133,11 @@ public class play_activity extends Activity {
             fireButton.setOnClickListener(new Button.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+
+
                     synchronized (this) {
+                        if (!countDownThread.isAlive())
+                            countDownThread.start();
                         arrayList.add(seekBar1);
                     }
 
