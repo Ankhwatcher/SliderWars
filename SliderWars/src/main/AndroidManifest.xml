@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ie.appz.sliderwars"
-    android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionCode="2"
+    android:versionName="1.1" >
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
 
@@ -27,10 +27,10 @@
         <activity
             android:name="ie.appz.sliderwars.ResultActivity"
             android:label="@string/title_activity_result"
-            android:parentActivityName="ie.appz.sliderwars.play_activity" >
+            android:parentActivityName="ie.appz.sliderwars.playActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ie.appz.sliderwars.play_activity" />
+                android:value="ie.appz.sliderwars.playActivity" />
         </activity>
     </application>
 

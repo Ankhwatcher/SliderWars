@@ -24,6 +24,7 @@ public class playActivity extends Activity {
     int hitCount = 0;
     ArrayList<RelativeLayout> interractList = new ArrayList<RelativeLayout>();
     Boolean appRunning = true;
+    Boolean countdownRunning = false;
     SeekBar.OnSeekBarChangeListener disableSeek = new SeekBar.OnSeekBarChangeListener() {
         int progress = 0;
 
@@ -43,7 +44,7 @@ public class playActivity extends Activity {
         }
     };
     ArrayList<SeekBar> arrayList = new ArrayList<SeekBar>();
-    Thread countDownThread = new Thread(new Runnable() {
+    Runnable runnable = new Runnable() {
         @Override
         public void run() {
             for (int j = 10; j > 0; j--) {
@@ -71,8 +72,9 @@ public class playActivity extends Activity {
                 startActivity(intent);
             }
         }
-    });
-    Thread backgroundThread = new Thread(new Runnable() {
+    };
+    Thread countDownThread = new Thread(runnable);
+    Runnable backgroundRunnable = new Runnable() {
         public void run() {
             while (true)
 
@@ -111,7 +113,7 @@ public class playActivity extends Activity {
             }
 
         }
-    });
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,7 +122,7 @@ public class playActivity extends Activity {
         LinearLayout mainLayout = (LinearLayout) findViewById(R.id.container);
         countdownText = (TextView) findViewById(R.id.countdown);
         targetHit = Toast.makeText(this, "Target Hit!", Toast.LENGTH_SHORT);
-        backgroundThread.start();
+
 
         for (int i = 0; i < 3; i++) {
             RelativeLayout interract = (RelativeLayout) getLayoutInflater().inflate(R.layout.interract_layout, null);
@@ -136,8 +138,10 @@ public class playActivity extends Activity {
 
 
                     synchronized (this) {
-                        if (!countDownThread.isAlive())
+                        if (!countdownRunning) {
+                            countdownRunning = true;
                             countDownThread.start();
+                        }
                         arrayList.add(seekBar1);
                     }
 
@@ -149,6 +153,23 @@ public class playActivity extends Activity {
         }
 
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        synchronized (this) {
+            arrayList.clear();
+            for (RelativeLayout relativeLayout : interractList) {
+                ((SeekBar) relativeLayout.findViewById(R.id.seekBar1)).setProgress(0);
+            }
+            hitCount=0;
+            countdownRunning = false;
+            countDownThread = new Thread(runnable);
+            appRunning = true;
+            Thread backgroundThread = new Thread(backgroundRunnable);
+            backgroundThread.start();
+        }
     }
 
     @Override
@@ -172,11 +193,17 @@ public class playActivity extends Activity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onPause() {
+        super.onPause();
         synchronized (this) {
             appRunning = false;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
     }
 }
 
