@@ -1,12 +1,19 @@
-<FrameLayout
+<LinearLayout
     android:id="@+id/container"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/resultText"
-        style="@android:style/TextAppearance.Large"
+        style="?android:textAppearanceLarge"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
-</FrameLayout>
+
+    <TextView
+        android:id="@+id/highestHits"
+        style="?android:textAppearanceMedium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+</LinearLayout>

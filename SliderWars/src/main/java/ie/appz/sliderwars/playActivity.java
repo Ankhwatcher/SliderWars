@@ -1,5 +1,6 @@
 package ie.appz.sliderwars;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,33 +19,9 @@ import java.util.List;
 
 public class playActivity extends Activity {
 
-    public static String RESULT_INT = "result_int";
-    Toast targetHit = null;
-    TextView countdownText;
-    int hitCount = 0;
-    ArrayList<RelativeLayout> interractList = new ArrayList<RelativeLayout>();
-    Boolean appRunning = true;
-    Boolean countdownRunning = false;
-    SeekBar.OnSeekBarChangeListener disableSeek = new SeekBar.OnSeekBarChangeListener() {
-        int progress = 0;
-
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-        }
-
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
-            progress = seekBar.getProgress();
-        }
-
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-            seekBar.setProgress(progress);
-        }
-    };
-    ArrayList<SeekBar> arrayList = new ArrayList<SeekBar>();
-    Runnable runnable = new Runnable() {
+    public static final String RESULT_INT = "result_int";
+    private final ArrayList<SeekBar> arrayList = new ArrayList<SeekBar>();
+    private final Runnable runnable = new Runnable() {
         @Override
         public void run() {
             for (int j = 10; j > 0; j--) {
@@ -73,8 +50,7 @@ public class playActivity extends Activity {
             }
         }
     };
-    Thread countDownThread = new Thread(runnable);
-    Runnable backgroundRunnable = new Runnable() {
+    private final Runnable backgroundRunnable = new Runnable() {
         public void run() {
             while (true)
 
@@ -114,7 +90,33 @@ public class playActivity extends Activity {
 
         }
     };
+    private final Thread countDownThread = new Thread(runnable);
+    private final ArrayList<RelativeLayout> interractList = new ArrayList<RelativeLayout>();
+    private final SeekBar.OnSeekBarChangeListener disableSeek = new SeekBar.OnSeekBarChangeListener() {
+        private int progress = 0;
 
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            progress = seekBar.getProgress();
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            seekBar.setProgress(progress);
+        }
+    };
+    private Toast targetHit = null;
+    private TextView countdownText;
+    private int hitCount = 0;
+    private Boolean appRunning = true;
+    private Boolean countdownRunning = false;
+
+    @SuppressLint("ShowToast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -127,32 +129,29 @@ public class playActivity extends Activity {
         for (int i = 0; i < 3; i++) {
             RelativeLayout interract = (RelativeLayout) getLayoutInflater().inflate(R.layout.interract_layout, null);
 
-            final SeekBar seekBar1 = ((SeekBar) interract.findViewById(R.id.seekBar1));
-            seekBar1.setOnSeekBarChangeListener(disableSeek);
+            if (interract != null) {
+                final SeekBar seekBar1 = ((SeekBar) interract.findViewById(R.id.seekBar1));
+                seekBar1.setOnSeekBarChangeListener(disableSeek);
+                Button fireButton = (Button) interract.findViewById(R.id.fireButton);
+                fireButton.setText(String.valueOf(i + 1));
+                fireButton.setOnClickListener(new Button.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
 
-            Button fireButton = (Button) interract.findViewById(R.id.fireButton);
-            fireButton.setText(String.valueOf(i + 1));
-            fireButton.setOnClickListener(new Button.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-
-                    synchronized (this) {
-                        if (!countdownRunning) {
-                            countdownRunning = true;
-                            countDownThread.start();
+                        synchronized (this) {
+                            if (!countdownRunning) {
+                                countdownRunning = true;
+                                countDownThread.start();
+                            }
+                            arrayList.add(seekBar1);
                         }
-                        arrayList.add(seekBar1);
                     }
-
-                }
-            });
-            mainLayout.addView(interract, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
-            interractList.add(interract);
+                });
+                mainLayout.addView(interract, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
+                interractList.add(interract);
+            }
 
         }
-
-
     }
 
     @Override
@@ -163,9 +162,9 @@ public class playActivity extends Activity {
             for (RelativeLayout relativeLayout : interractList) {
                 ((SeekBar) relativeLayout.findViewById(R.id.seekBar1)).setProgress(0);
             }
-            hitCount=0;
+            hitCount = 0;
             countdownRunning = false;
-            countDownThread = new Thread(runnable);
+            //countDownThread = new Thread(runnable);
             appRunning = true;
             Thread backgroundThread = new Thread(backgroundRunnable);
             backgroundThread.start();
@@ -186,8 +185,8 @@ public class playActivity extends Activity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
-            case R.id.action_settings:
-                return true;
+            default:
+
         }
         return super.onOptionsItemSelected(item);
     }
@@ -198,12 +197,6 @@ public class playActivity extends Activity {
         synchronized (this) {
             appRunning = false;
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
     }
 }
 
