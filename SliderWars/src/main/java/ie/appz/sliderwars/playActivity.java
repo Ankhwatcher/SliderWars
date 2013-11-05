@@ -36,6 +36,7 @@ public class playActivity extends Activity {
                         @Override
                         public void run() {
                             countdownText.setText(seconds + "s");
+                            hitCountText.setText(hitCount+" hits");
                         }
                     });
 
@@ -52,11 +53,8 @@ public class playActivity extends Activity {
     };
     private final Runnable backgroundRunnable = new Runnable() {
         public void run() {
-            while (true)
 
-
-            {
-
+            while (true) {
                 synchronized (this) {
                     if (!appRunning)
                         break;
@@ -68,20 +66,30 @@ public class playActivity extends Activity {
                         break;
                     }
                     List<SeekBar> seekBarListB = new ArrayList<SeekBar>();
-                    for (SeekBar seekBar : arrayList) {
+                    for (final SeekBar seekBar : arrayList) {
                         int progress = seekBar.getProgress();
                         int seekIncrement = seekBar.getMax() / 20;
                         progress += seekIncrement;
                         if (progress == seekBar.getMax()) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    seekBar.setProgress(0);
+                                }
+                            });
 
-                            seekBar.setProgress(0);
                             hitCount++;
                             targetHit.show();
                         } else {
                             seekBarListB.add(seekBar);
-                            seekBar.setProgress(progress);
+                            final int finalProgress = progress;
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    seekBar.setProgress(finalProgress);
+                                }
+                            });
                         }
-
                     }
                     arrayList.clear();
                     arrayList.addAll(seekBarListB);
@@ -90,7 +98,6 @@ public class playActivity extends Activity {
 
         }
     };
-    private final Thread countDownThread = new Thread(runnable);
     private final ArrayList<RelativeLayout> interractList = new ArrayList<RelativeLayout>();
     private final SeekBar.OnSeekBarChangeListener disableSeek = new SeekBar.OnSeekBarChangeListener() {
         private int progress = 0;
@@ -110,8 +117,10 @@ public class playActivity extends Activity {
             seekBar.setProgress(progress);
         }
     };
+    private Thread countDownThread = new Thread(runnable);
     private Toast targetHit = null;
     private TextView countdownText;
+    private TextView hitCountText;
     private int hitCount = 0;
     private Boolean appRunning = true;
     private Boolean countdownRunning = false;
@@ -123,6 +132,7 @@ public class playActivity extends Activity {
         setContentView(R.layout.activity_play);
         LinearLayout mainLayout = (LinearLayout) findViewById(R.id.container);
         countdownText = (TextView) findViewById(R.id.countdown);
+        hitCountText = (TextView) findViewById(R.id.hitCount);
         targetHit = Toast.makeText(this, "Target Hit!", Toast.LENGTH_SHORT);
 
 
@@ -164,7 +174,7 @@ public class playActivity extends Activity {
             }
             hitCount = 0;
             countdownRunning = false;
-            //countDownThread = new Thread(runnable);
+            countDownThread = new Thread(runnable);
             appRunning = true;
             Thread backgroundThread = new Thread(backgroundRunnable);
             backgroundThread.start();
